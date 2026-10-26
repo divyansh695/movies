@@ -1,0 +1,445 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MovieMate — Movie Recommendation System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--fg:#f1efea;--mute:#8c8a85;--line:#252525;--gold:#c9b98a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Archivo,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible,.card:focus-visible,.trend:focus-visible,.slot:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+header{position:sticky;top:0;z-index:20;background:#050505ee;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{max-width:1250px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px;font-size:13px;color:var(--mute)}
+.logo{font-size:22px;font-weight:300;font-stretch:125%;color:var(--fg);letter-spacing:.01em}
+.logo span{font-weight:800}
+.keybar{border-bottom:1px solid var(--line);padding:10px 22px}
+.keyin{max-width:1250px;margin:auto;display:flex;gap:10px}
+.keyin input{flex:1;min-width:0;background:transparent;color:var(--fg);border:0;border-bottom:1px solid var(--line);padding:9px 2px;font-size:14px;outline:0}
+.keyin input:focus{border-color:var(--fg)}
+.btn{border:1px solid var(--fg);background:var(--fg);color:#000;font-weight:600;border-radius:2px;padding:10px 20px;cursor:pointer;transition:.15s}
+.btn:hover{background:transparent;color:var(--fg)}
+.btn.alt{background:transparent;color:var(--fg);border-color:#444}
+.btn.alt:hover{border-color:var(--fg)}
+.btn:disabled{opacity:.5;cursor:wait}
+.hero{padding-top:44px;border-bottom:1px solid var(--line);overflow:hidden}
+.heroTop{max-width:1250px;margin:auto;padding:0 22px 32px;display:flex;align-items:end;justify-content:space-between;gap:30px;flex-wrap:wrap}
+h1{font-size:clamp(30px,5vw,58px);line-height:1;font-weight:300;font-stretch:112%;max-width:560px}
+.searchWrap{position:relative;width:min(100%,430px)}
+.search{display:flex;border-bottom:1px solid var(--mute)}
+.search:focus-within{border-color:var(--fg)}
+.search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--fg);padding:14px 2px;font-size:16px}
+.search input::placeholder{color:var(--mute)}
+.search button{background:transparent;border:0;color:var(--fg);padding:0 4px 0 16px;font-weight:600;cursor:pointer}
+.suggest{position:absolute;top:calc(100% + 6px);left:0;width:100%;background:#0e0e0e;border:1px solid #333;display:none;z-index:100;box-shadow:0 18px 40px rgba(0,0,0,.7)}
+.suggest.open{display:block}
+.suggestItem{padding:12px 14px;display:flex;justify-content:space-between;gap:15px;cursor:pointer;border-bottom:1px solid var(--line)}
+.suggestItem:last-child{border-bottom:0}
+.suggestItem:hover,.suggestItem.active{background:#1c1c1c}
+.suggestTitle{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.suggestYear{color:var(--mute);font-size:12px;flex-shrink:0}
+.suggestMessage{padding:14px;color:var(--mute);font-size:13px}
+.strip{max-width:1250px;margin:auto;padding:0 22px;display:flex;gap:10px;height:clamp(300px,54vh,540px)}
+.stripMsg{color:var(--mute);align-self:center;font-size:15px}
+.slot{flex:1 1 0;min-width:0;border:0;padding:0;background:#111;cursor:pointer;overflow:hidden;transition:flex .5s cubic-bezier(.2,.7,.2,1)}
+.slot:hover,.slot:focus-visible{flex-grow:2.6}
+.slot img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.75);transition:filter .4s}
+.slot:hover img,.slot:focus-visible img{filter:none}
+.bigword{max-width:1250px;margin:0 auto;padding:0 22px;font-size:clamp(80px,17vw,260px);font-weight:200;font-stretch:125%;line-height:.9;color:#232323;white-space:nowrap;overflow:hidden;height:.6em;user-select:none;transition:color .3s}
+.strip:hover+.bigword{color:#3a3a3a}
+.wrap{width:1250px;max-width:100%;margin:auto;padding:40px 22px}
+.sectionTitle{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:20px}
+.sectionTitle h2{font-size:30px;font-weight:300;font-stretch:112%}
+.sectionTitle span{color:var(--mute);font-size:14px}
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.filter{white-space:nowrap;background:transparent;color:var(--mute);border:1px solid #333;padding:8px 16px;border-radius:2px;cursor:pointer;transition:.15s}
+.filter.active,.filter:hover{background:var(--fg);color:#000;border-color:var(--fg)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.card{background:transparent;cursor:pointer}
+.poster{aspect-ratio:2/3;background:#141414;overflow:hidden}
+.poster img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) contrast(1.05);transition:filter .35s,transform .5s}
+.card:hover .poster img,.card:focus-visible .poster img,.trend:hover .poster img{filter:none;transform:scale(1.04)}
+.placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:200;font-stretch:125%;color:var(--mute)}
+.info{padding:10px 0}
+.info h3{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{display:flex;justify-content:space-between;color:var(--mute);font-size:12px;margin-top:5px}
+.rating{color:var(--fg)}
+.more{text-align:center;margin-top:30px}
+.detail{display:none;border:1px solid var(--line);margin-top:14px;scroll-margin-top:80px;background:#0a0a0a}
+.detail.show{display:block}
+.detailIn{display:grid;grid-template-columns:260px 1fr;gap:34px;padding:30px}
+.detailPoster{aspect-ratio:2/3;background:#141414;overflow:hidden}
+.detailPoster img{width:100%;height:100%;object-fit:cover}
+.detailText h2{font-size:clamp(28px,4vw,48px);font-weight:300;font-stretch:112%;line-height:1.05;margin-bottom:8px}
+.tagline{color:var(--gold);margin-bottom:12px}
+.detailText p{color:#bdbab3;line-height:1.7;margin:16px 0;max-width:70ch}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid #333;color:var(--mute);padding:5px 11px;font-size:12px}
+.close{background:transparent;border:1px solid #333;color:var(--fg);padding:7px 14px;cursor:pointer;margin-bottom:16px;border-radius:2px}
+.close:hover{border-color:var(--fg)}
+.actions{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
+.trailer{margin-top:20px;aspect-ratio:16/9;max-width:640px}
+.trailer iframe{width:100%;height:100%;border:0}
+.recgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.match{color:var(--gold)}
+.trending{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px}
+.trend{flex:0 0 150px;cursor:pointer}
+.trend h3{font-size:13px;font-weight:600;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{padding:50px 10px;text-align:center;color:var(--mute);display:none}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:35px 22px;text-align:center;color:#666;font-size:13px}
+.loading{padding:40px;text-align:center;color:var(--mute);grid-column:1/-1}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:700px){
+.grid{grid-template-columns:repeat(2,1fr);gap:12px}
+.recgrid{grid-template-columns:repeat(2,1fr)}
+.detailIn{grid-template-columns:130px 1fr;gap:18px;padding:18px}
+.keyin{flex-direction:column}
+.strip{gap:6px;height:clamp(240px,42vh,360px)}
+.slot:nth-child(n+6){display:none}
+.nav>div:last-child{display:none}
+}
+@media(max-width:450px){.detailIn{grid-template-columns:1fr}.detailPoster{max-width:210px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header><div class="nav">
+  <div class="logo">Movie<span>Mate</span></div>
+  <div style="color:#777;font-size:13px">Movie Recommendation System</div>
+</div></header>
+
+<div class="keybar"><div class="keyin">
+  <input id="apiKey" type="password" placeholder="Enter TMDB API key (v3) or read access token (v4)" autocomplete="off">
+  <button class="btn" onclick="saveKey()">Load Movies</button>
+</div></div>
+
+<section class="hero">
+  <div class="heroTop">
+    <h1>Find your next favourite movie.</h1>
+    <div class="searchWrap">
+      <div class="search">
+        <input id="searchInput" placeholder="Search for a movie" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="suggest">
+        <button onclick="searchMovies()">Search</button>
+      </div>
+      <div id="suggest" class="suggest" role="listbox"></div>
+    </div>
+  </div>
+  <div class="strip" id="strip"><div class="stripMsg">Enter your TMDB API key above to load this week's posters.</div></div>
+  <div class="bigword" id="bigword" aria-hidden="true">MovieMate</div>
+</section>
+
+<div class="wrap">
+  <div class="sectionTitle"><h2>Browse Movies</h2><span id="status">Enter your TMDB API key</span></div>
+  <div class="filters" id="filters"></div>
+  <div id="detail" class="detail"></div>
+  <div id="grid" class="grid" style="margin-top:25px"><div class="loading">Enter your TMDB API key above to start MovieMate.</div></div>
+  <div class="empty" id="empty">No movies found.</div>
+  <div class="more"><button class="btn alt" id="moreBtn" style="display:none" onclick="loadMore()">Load more</button></div>
+</div>
+
+<section class="wrap">
+  <div class="sectionTitle"><h2>Trending Now</h2><span>This week</span></div>
+  <div id="trending" class="trending"><div class="loading">Loading trending movies...</div></div>
+</section>
+
+<footer>MovieMate — Movie Recommendation System<br><small>Powered by TMDB API · Content-based recommendations</small></footer>
+
+<script>
+// Paste your TMDB key between the quotes to skip the key box every time.
+const DEFAULT_KEY = "18b548a9e81f1e4751670351e8d8bd6c";
+let KEY = DEFAULT_KEY || localStorage.getItem("moviemate_tmdb_key") || "";
+const $ = id => document.getElementById(id);
+const searchInput = $("searchInput"), suggestEl = $("suggest");
+$("apiKey").value = KEY;
+if (DEFAULT_KEY) document.querySelector(".keybar").style.display = "none";
+
+const GENRES = {28:"Action",12:"Adventure",16:"Animation",35:"Comedy",80:"Crime",99:"Documentary",18:"Drama",10751:"Family",14:"Fantasy",36:"History",27:"Horror",9648:"Mystery",10749:"Romance",878:"Sci-Fi",53:"Thriller",10752:"War",37:"Western"};
+const FILTERS = [["all","All"],[28,"Action"],[12,"Adventure"],[16,"Animation"],[35,"Comedy"],[80,"Crime"],[18,"Drama"],[27,"Horror"],[10749,"Romance"],[878,"Sci-Fi"],[53,"Thriller"]];
+$("filters").innerHTML = FILTERS.map(([id,n],i) =>
+  `<button class="filter${i?"":" active"}" data-g="${id}">${n}</button>`).join("");
+$("filters").addEventListener("click", e => {
+  const b = e.target.closest(".filter"); if (b) setGenre(b.dataset.g);
+});
+
+// Browse state: one source of truth for what the grid shows.
+let mode = {type:"popular", genre:"all", q:"", page:0, total:1};
+let shown = [];            // movies currently in the grid
+const cache = {};          // id -> movie data (list or detail), never mixed into `shown`
+
+/* ---------- API ---------- */
+async function api(url, params = {}) {
+  const u = new URL("https://api.themoviedb.org/3" + url);
+  u.searchParams.set("language", "en-US");
+  Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, v));
+  const opts = {};
+  if (KEY.length > 40) opts.headers = {Authorization: "Bearer " + KEY};  // v4 token
+  else u.searchParams.set("api_key", KEY);                                // v3 key
+  const r = await fetch(u, opts);
+  if (!r.ok) throw new Error("TMDB request failed (" + r.status + ")");
+  return r.json();
+}
+
+function saveKey() {
+  const k = $("apiKey").value.trim();
+  if (!k) { setStatus("Enter your TMDB API key first."); return; }
+  KEY = k;
+  localStorage.setItem("moviemate_tmdb_key", KEY);
+  resetBrowse(); loadTrending();
+}
+
+/* ---------- Helpers ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const year = m => m.release_date ? m.release_date.slice(0,4) : "N/A";
+const rating = m => m.vote_average ? m.vote_average.toFixed(1) : "N/A";
+const setStatus = t => $("status").textContent = t;
+const genreIds = m => m.genre_ids || (m.genres || []).map(g => g.id);
+
+function posterHTML(m) {
+  if (m.poster_path) return `<img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${esc(m.title)} poster" loading="lazy">`;
+  const letters = (m.title || "M").split(" ").slice(0,2).map(x => x[0]).join("");
+  return `<div class="placeholder">${esc(letters)}</div>`;
+}
+
+function cardHTML(m, handler, extra = "") {
+  cache[m.id] = cache[m.id] || m;
+  return `<div class="card" tabindex="0" role="button" onclick="${handler}(${m.id})" onkeydown="if(event.key==='Enter')${handler}(${m.id})">
+    <div class="poster">${posterHTML(m)}</div>
+    <div class="info"><h3>${esc(m.title)}</h3>
+      <div class="meta"><span>${year(m)}</span><span class="rating">★ ${rating(m)}</span></div>${extra}</div></div>`;
+}
+
+/* ---------- Browse: popular / genre / search with Load more ---------- */
+function resetBrowse(type = "popular", opts = {}) {
+  mode = {type, genre: opts.genre ?? "all", q: opts.q ?? "", page: 0, total: 1};
+  shown = [];
+  $("grid").innerHTML = '<div class="loading">Loading movies...</div>';
+  loadMore(true);
+}
+
+async function loadMore(first) {
+  if (!KEY) return;
+  if (mode.page >= mode.total) return;
+  const snapshot = mode, page = mode.page + 1;
+  $("moreBtn").disabled = true;
+  try {
+    let d;
+    if (mode.type === "search") d = await api("/search/movie", {query: mode.q, page, include_adult: false});
+    else if (mode.genre !== "all") d = await api("/discover/movie", {with_genres: mode.genre, sort_by: "popularity.desc", "vote_count.gte": 100, page});
+    else d = await api("/movie/popular", {page});
+    if (snapshot !== mode) return;   // user changed filter/search meanwhile
+    mode.page = page; mode.total = Math.min(d.total_pages || 1, 500);
+    const seen = new Set(shown.map(m => m.id));
+    shown.push(...(d.results || []).filter(m => !seen.has(m.id)));
+    renderGrid();
+  } catch (e) {
+    if (first) $("grid").innerHTML = '<div class="loading">The API key is invalid or the TMDB request failed.</div>';
+    setStatus("API error");
+  } finally { $("moreBtn").disabled = false; }
+}
+
+function renderGrid() {
+  $("empty").style.display = shown.length ? "none" : "block";
+  $("grid").innerHTML = shown.map(m => cardHTML(m, "openMovie")).join("");
+  $("moreBtn").style.display = mode.page < mode.total ? "inline-block" : "none";
+  setStatus(mode.type === "search" ? `${shown.length} results for "${mode.q}"` : `${shown.length} movies loaded`);
+}
+
+function setActiveChip(g) {
+  document.querySelectorAll(".filter").forEach(b => b.classList.toggle("active", b.dataset.g === String(g)));
+}
+function setGenre(g) { setActiveChip(g); searchInput.value = ""; resetBrowse("popular", {genre: g}); }
+
+function searchMovies() {
+  hideSuggestions();
+  if (!KEY) { setStatus("Enter your TMDB API key first."); return; }
+  const q = searchInput.value.trim();
+  setActiveChip("all");
+  if (!q) { resetBrowse(); return; }
+  resetBrowse("search", {q});
+}
+
+/* ---------- Movie detail (fetches full data, trailer, keywords) ---------- */
+let openToken = 0;
+async function openMovie(id) {
+  const token = ++openToken, box = $("detail");
+  box.classList.add("show");
+  box.innerHTML = '<div class="loading">Loading details...</div>';
+  box.scrollIntoView({behavior: "smooth", block: "start"});
+  let m;
+  try {
+    m = await api("/movie/" + id, {append_to_response: "videos,keywords"});
+  } catch (e) {
+    if (token === openToken) box.innerHTML = '<div class="loading">Could not load this movie.</div>';
+    return;
+  }
+  if (token !== openToken) return;
+  cache[id] = m;
+  const vids = (m.videos?.results || []).filter(v => v.site === "YouTube");
+  const trailer = vids.find(v => v.type === "Trailer" && v.official) || vids.find(v => v.type === "Trailer") || vids[0];
+  const runtime = m.runtime ? ` · ${Math.floor(m.runtime/60)}h ${m.runtime%60}m` : "";
+  box.innerHTML = `
+  <div class="detailIn">
+    <div class="detailPoster">${posterHTML(m)}</div>
+    <div class="detailText">
+      <button class="close" onclick="closeDetail()">✕ Close</button>
+      <h2>${esc(m.title)}</h2>
+      ${m.tagline ? `<div class="tagline">${esc(m.tagline)}</div>` : ""}
+      <div class="meta" style="max-width:320px;font-size:14px"><span>${year(m)}${runtime}</span><span class="rating">★ ${rating(m)}</span></div>
+      <p>${esc(m.overview || "No overview available.")}</p>
+      <div class="chips">${(m.genres || []).map(g => `<span class="chip">${esc(g.name)}</span>`).join("")}</div>
+      <div class="actions">
+        <button class="btn" onclick="recommend(${m.id})">Find similar movies</button>
+        ${trailer ? `<button class="btn alt" id="trailerBtn" onclick="toggleTrailer('${esc(trailer.key)}')">▶ Watch trailer</button>` : ""}
+      </div>
+      <div id="trailerBox"></div>
+      <div id="recommendations"></div>
+    </div>
+  </div>`;
+}
+
+function closeDetail() { openToken++; $("detail").classList.remove("show"); $("detail").innerHTML = ""; }
+
+function toggleTrailer(key) {
+  const tb = $("trailerBox"), btn = $("trailerBtn");
+  if (tb.innerHTML) { tb.innerHTML = ""; btn.textContent = "▶ Watch trailer"; return; }
+  tb.innerHTML = `<div class="trailer"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(key)}?autoplay=1" title="Trailer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></div>`;
+  btn.textContent = "✕ Hide trailer";
+}
+
+/* ---------- Content-based recommendations ----------
+   Candidates come from TMDB's /similar and /recommendations.
+   Each is scored on genre overlap (Jaccard), keyword overlap (Jaccard),
+   plus a small boost for audience rating. */
+const jaccard = (a, b) => {
+  const A = new Set(a), B = new Set(b);
+  const inter = [...A].filter(x => B.has(x)).length, union = new Set([...A, ...B]).size;
+  return union ? inter / union : 0;
+};
+
+async function recommend(id) {
+  const box = $("recommendations"), token = openToken;
+  box.innerHTML = '<div class="loading">Finding similar movies...</div>';
+  try {
+    const base = cache[id];
+    const baseGenres = genreIds(base);
+    const baseKw = (base.keywords?.keywords || []).map(k => k.id);
+    const [sim, rec] = await Promise.all([api(`/movie/${id}/similar`), api(`/movie/${id}/recommendations`)]);
+    const pool = new Map();
+    [...(rec.results || []), ...(sim.results || [])].forEach(m => {
+      if (m.id !== id && m.vote_count >= 50 && !pool.has(m.id)) pool.set(m.id, m);
+    });
+    // First pass: genres + rating. Then fetch keywords for the best candidates.
+    let cands = [...pool.values()].map(m => ({m, s: jaccard(baseGenres, genreIds(m)) * 60 + (m.vote_average || 0) * 2}))
+      .sort((a, b) => b.s - a.s).slice(0, 12);
+    const kws = await Promise.all(cands.map(c =>
+      api(`/movie/${c.m.id}/keywords`).then(d => (d.keywords || []).map(k => k.id)).catch(() => [])));
+    cands.forEach((c, i) => { c.kw = jaccard(baseKw, kws[i]); c.s += c.kw * 40; });
+    cands.sort((a, b) => b.s - a.s);
+    if (token !== openToken || !$("recommendations")) return;
+    const top = cands.slice(0, 6);
+    if (!top.length) { box.innerHTML = '<p style="color:#777;margin-top:20px">No similar movies found.</p>'; return; }
+    box.innerHTML = `<h3 style="margin:30px 0 15px">Recommended for you</h3><div class="recgrid">` +
+      top.map(c => {
+        const pct = Math.min(99, Math.round((c.s / 130) * 100 + 35));
+        return cardHTML(c.m, "openMovie", `<div class="meta"><span class="match">${pct}% match</span></div>`);
+      }).join("") + "</div>";
+  } catch (e) {
+    box.innerHTML = '<p style="color:#777;margin-top:20px">Recommendations are unavailable right now.</p>';
+  }
+}
+
+/* ---------- Search suggestions (debounced, stale-safe, keyboard-navigable) ---------- */
+let sugTimer = null, sugSeq = 0, sugActive = -1;
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(sugTimer);
+  const q = searchInput.value.trim();
+  if (!q) { hideSuggestions(); return; }
+  if (!KEY) { showMsg("Enter your TMDB API key first."); return; }
+  sugTimer = setTimeout(() => fetchSuggestions(q), 300);
+});
+
+searchInput.addEventListener("keydown", e => {
+  const items = [...suggestEl.querySelectorAll(".suggestItem")];
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    if (!items.length) return;
+    e.preventDefault();
+    sugActive = (sugActive + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+    items.forEach((el, i) => el.classList.toggle("active", i === sugActive));
+    items[sugActive].scrollIntoView({block: "nearest"});
+  } else if (e.key === "Enter") {
+    if (sugActive >= 0 && items[sugActive]) pickSuggestion(Number(items[sugActive].dataset.id));
+    else searchMovies();
+  } else if (e.key === "Escape") hideSuggestions();
+});
+
+function showMsg(t) {
+  suggestEl.innerHTML = `<div class="suggestMessage">${esc(t)}</div>`;
+  suggestEl.classList.add("open"); searchInput.setAttribute("aria-expanded", "true");
+}
+
+async function fetchSuggestions(q) {
+  const seq = ++sugSeq;
+  showMsg("Searching...");
+  try {
+    const d = await api("/search/movie", {query: q, page: 1, include_adult: false});
+    if (seq !== sugSeq || searchInput.value.trim() !== q) return;   // stale response
+    const res = (d.results || []).slice(0, 8);
+    if (!res.length) { showMsg("No matches found"); return; }
+    sugActive = -1;
+    suggestEl.innerHTML = res.map(m => {
+      cache[m.id] = cache[m.id] || m;
+      return `<div class="suggestItem" role="option" data-id="${m.id}"><span class="suggestTitle">${esc(m.title || "Untitled")}</span><span class="suggestYear">${year(m)}</span></div>`;
+    }).join("");
+  } catch (e) { if (seq === sugSeq) showMsg("Suggestions unavailable."); }
+}
+
+suggestEl.addEventListener("click", e => {
+  const it = e.target.closest(".suggestItem"); if (it) pickSuggestion(Number(it.dataset.id));
+});
+
+function pickSuggestion(id) {
+  hideSuggestions(); searchInput.value = "";
+  openMovie(id);   // opens detail only; the Browse list is left untouched
+}
+
+function hideSuggestions() {
+  clearTimeout(sugTimer); sugSeq++; sugActive = -1;
+  suggestEl.classList.remove("open"); suggestEl.innerHTML = "";
+  searchInput.setAttribute("aria-expanded", "false");
+}
+document.addEventListener("click", e => { if (!e.target.closest(".searchWrap")) hideSuggestions(); });
+
+/* ---------- Trending ---------- */
+async function loadTrending() {
+  if (!KEY) return;
+  try {
+    const d = await api("/trending/movie/week");
+    renderStrip(d.results || []);
+    $("trending").innerHTML = (d.results || []).slice(0, 12).map(m => {
+      cache[m.id] = cache[m.id] || m;
+      return `<div class="trend" tabindex="0" role="button" onclick="openMovie(${m.id})" onkeydown="if(event.key==='Enter')openMovie(${m.id})">
+        <div class="poster">${posterHTML(m)}</div><h3>${esc(m.title)}</h3></div>`;
+    }).join("");
+  } catch (e) { $("trending").innerHTML = '<div class="loading">Trending is unavailable.</div>'; }
+}
+
+/* ---------- Hero poster strip ---------- */
+function renderStrip(list) {
+  const s = list.filter(m => m.poster_path).slice(0, 7);
+  $("strip").innerHTML = s.map(m => `<button class="slot" data-t="${esc(m.title)}" onclick="openMovie(${m.id})" aria-label="${esc(m.title)}"><img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt=""></button>`).join("");
+  if (s[0]) $("bigword").textContent = s[0].title;
+}
+["mouseover", "focusin"].forEach(ev => $("strip").addEventListener(ev, e => {
+  const b = e.target.closest(".slot"); if (b) $("bigword").textContent = b.dataset.t;
+}));
+
+/* ---------- Start ---------- */
+if (KEY) { resetBrowse(); loadTrending(); }
+</script>
+</body>
+</html>
